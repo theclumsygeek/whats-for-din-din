@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { isConfigured, signInWithEmail, supabase } from '../lib/supabase';
+import { isConfigured, signInWithPassword, supabase } from '../lib/supabase';
 import { ThemeToggle } from './ThemeToggle';
 
 export function AuthGate({ children }: { children: ReactNode }) {
@@ -61,7 +61,7 @@ function Logo() {
 
 function SignIn() {
   const [email, setEmail] = useState('');
-  const [sent, setSent] = useState(false);
+  const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,11 +70,12 @@ function SignIn() {
     setBusy(true);
     setError(null);
     try {
-      await signInWithEmail(email);
-      setSent(true);
+      await signInWithPassword(email, password);
+      // On success, onAuthStateChange swaps in the app — nothing else to do.
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not send the link.');
-    } finally {
+      setError(
+        err instanceof Error ? err.message : 'Could not sign in. Check your details.',
+      );
       setBusy(false);
     }
   }
@@ -82,38 +83,41 @@ function SignIn() {
   return (
     <Shell>
       <Logo />
-      {sent ? (
-        <div className="card p-6">
-          <p className="font-bold">Check your email ✉️</p>
-          <p className="mt-2 text-sm text-ink-soft dark:text-earth-100">
-            We sent a magic sign-in link to <strong>{email}</strong>. Open it on
-            this device to continue.
-          </p>
-        </div>
-      ) : (
-        <form onSubmit={submit} className="card space-y-3 p-6 text-left">
-          <label className="block text-sm font-semibold" htmlFor="email">
-            Sign in with your email
-          </label>
-          <input
-            id="email"
-            type="email"
-            required
-            autoComplete="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="field"
-          />
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <button type="submit" disabled={busy} className="btn-primary w-full">
-            {busy ? 'Sending…' : 'Send magic link'}
-          </button>
-          <p className="text-center text-xs text-ink-soft dark:text-earth-100">
-            Only invited accounts can sign in.
-          </p>
-        </form>
-      )}
+      <form onSubmit={submit} className="card space-y-3 p-6 text-left">
+        <label className="block text-sm font-semibold" htmlFor="email">
+          Email
+        </label>
+        <input
+          id="email"
+          type="email"
+          required
+          autoComplete="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="field"
+        />
+        <label className="block text-sm font-semibold" htmlFor="password">
+          Password
+        </label>
+        <input
+          id="password"
+          type="password"
+          required
+          autoComplete="current-password"
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="field"
+        />
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        <button type="submit" disabled={busy} className="btn-primary w-full">
+          {busy ? 'Signing in…' : 'Sign in'}
+        </button>
+        <p className="text-center text-xs text-ink-soft dark:text-earth-100">
+          Accounts are created by the owner — there's no public sign-up.
+        </p>
+      </form>
     </Shell>
   );
 }

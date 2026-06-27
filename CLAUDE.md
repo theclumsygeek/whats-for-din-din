@@ -32,7 +32,7 @@ in a while. **All app logic runs in the browser**; Supabase is the only backend.
   (schema in `supabase/schema.sql`). Row-Level Security restricts all access to
   authenticated users; the anon key is public by design and safe to ship.
 - **`src/lib/supabase.ts`** is the single boundary to the DB: it creates the client,
-  handles magic-link auth, and maps snake_case rows <-> camelCase app types
+  handles email/password auth, and maps snake_case rows <-> camelCase app types
   (`toRecipe`/`toRow`). Nothing else imports `@supabase/supabase-js` for data.
 - **`src/state/DataProvider.tsx`** is the one stateful store (React context, `useData()`
   hook). On mount it shows `localStorage`-cached data instantly, then revalidates from
@@ -57,8 +57,9 @@ The heart of the app, kept **pure and dependency-free** so it's unit-tested in i
 - Two screens under `src/screens/` (`Tonight`, `Recipes`) switched by **tab state in
   `App.tsx`** — intentionally **no router** so GitHub Pages needs no SPA-routing
   fallback. Don't add react-router without revisiting the Pages deploy.
-- `AuthGate` wraps everything: shows a setup hint if env vars are missing, a magic-link
-  sign-in if logged out, otherwise the app.
+- `AuthGate` wraps everything: shows a setup hint if env vars are missing, an
+  email/password sign-in if logged out, otherwise the app. Accounts are created by the
+  owner in the Supabase dashboard (public sign-up is disabled), so there's no sign-up UI.
 - Styling is Tailwind with reusable component classes (`.card`, `.btn-primary`,
   `.chip-on/.chip-off`, `.field`) defined in `src/index.css`; brand palette
   (`brand`/`earth`/`ink`) and `darkMode: 'class'` in `tailwind.config.js`. Dark mode is

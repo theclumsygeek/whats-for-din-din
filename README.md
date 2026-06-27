@@ -10,7 +10,7 @@ filter, and a strict "use these ingredients" filter, then tap **Surprise me** �
 **Cooked it**.
 
 - **Frontend:** Vite + React + TypeScript + Tailwind, installable as a PWA
-- **Backend:** Supabase (Postgres + email magic-link auth + Row-Level Security)
+- **Backend:** Supabase (Postgres + email/password auth + Row-Level Security)
 - **Hosting:** GitHub Pages (free, public repo)
 
 The recipe data is small, so the app fetches everything once, caches it in
@@ -40,11 +40,13 @@ npm run build                # type-check + production build
 2. **SQL Editor → New query** → paste [`supabase/schema.sql`](supabase/schema.sql) →
    **Run**. (Optionally run [`supabase/seed.sql`](supabase/seed.sql) for sample recipes.)
 3. **Authentication → Providers → Email:** make sure Email is enabled, and turn
-   **"Allow new users to sign up" OFF** (so only invited people can get in).
-4. **Authentication → Users → Add user / Invite:** invite your two email addresses.
+   **"Allow new users to sign up" OFF** (so only the accounts you create can get in).
+4. **Authentication → Users → Add user → Create new user:** create your two accounts,
+   each with an email + password and **Auto Confirm User** ticked. (This avoids the
+   built-in mailer's low rate limit — no email is sent. Login uses the password.)
 5. **Project Settings → API:** copy the **Project URL** and **anon public** key into
    `.env.local` (and into GitHub secrets below). The anon key is safe to expose — RLS
-   only lets authenticated (invited) users read or write.
+   only lets authenticated users read or write.
 
 ### 2. GitHub Pages (hosting)
 

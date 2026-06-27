@@ -76,10 +76,13 @@ function toRow(input: RecipeInput) {
 
 // ---- auth ----
 
-export async function signInWithEmail(email: string): Promise<void> {
-  const { error } = await supabase.auth.signInWithOtp({
+export async function signInWithPassword(
+  email: string,
+  password: string,
+): Promise<void> {
+  const { error } = await supabase.auth.signInWithPassword({
     email: email.trim(),
-    options: { emailRedirectTo: window.location.href },
+    password,
   });
   if (error) throw error;
 }
