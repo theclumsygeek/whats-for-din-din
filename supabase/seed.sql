@@ -2,7 +2,7 @@
 -- Replace these with your real Well Your World favorites (or just add them in the
 -- app's Recipes tab). Run in the Supabase SQL Editor after schema.sql.
 
-insert into public.recipes (name, source_url, grain, main_ingredients, effort, notes)
+insert into public.recipes (name, source_url, base, main_ingredients, effort, notes)
 values
   ('Smoky Black Bean Bowl', null, 'rice',
    array['black beans','sweet potato','corn','lime'], 'quick',

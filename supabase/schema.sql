@@ -9,7 +9,7 @@ create table if not exists public.recipes (
   id               uuid primary key default gen_random_uuid(),
   name             text not null,
   source_url       text,
-  grain            text not null default 'other',
+  base             text not null default 'other',
   main_ingredients text[] not null default '{}',
   effort           text not null default 'medium',
   notes            text,

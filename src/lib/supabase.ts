@@ -21,7 +21,7 @@ interface RecipeRow {
   id: string;
   name: string;
   source_url: string | null;
-  grain: Recipe['grain'];
+  base: Recipe['base'];
   main_ingredients: string[] | null;
   effort: Recipe['effort'];
   notes: string | null;
@@ -41,7 +41,7 @@ function toRecipe(row: RecipeRow): Recipe {
     id: row.id,
     name: row.name,
     sourceUrl: row.source_url ?? undefined,
-    grain: row.grain,
+    base: row.base,
     mainIngredients: row.main_ingredients ?? [],
     effort: row.effort,
     notes: row.notes ?? undefined,
@@ -58,14 +58,14 @@ function toCookLog(row: CookLogRow): CookLogEntry {
 /** Fields a user can edit on the Recipes screen. */
 export type RecipeInput = Pick<
   Recipe,
-  'name' | 'sourceUrl' | 'grain' | 'mainIngredients' | 'effort' | 'notes'
+  'name' | 'sourceUrl' | 'base' | 'mainIngredients' | 'effort' | 'notes'
 >;
 
 function toRow(input: RecipeInput) {
   return {
     name: input.name.trim(),
     source_url: input.sourceUrl?.trim() || null,
-    grain: input.grain,
+    base: input.base,
     main_ingredients: input.mainIngredients
       .map((s) => s.trim().toLowerCase())
       .filter(Boolean),

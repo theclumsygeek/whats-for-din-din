@@ -1,23 +1,29 @@
-import type { Grain, Recipe } from './types';
+import type { Base, Recipe } from './types';
 import { daysSince } from './suggest';
 
-export const GRAIN_LABEL: Record<Grain, string> = {
+export const BASE_LABEL: Record<Base, string> = {
   rice: 'Rice',
   pasta: 'Pasta',
   potato: 'Potato',
   bread: 'Bread',
   wrap: 'Wrap',
-  none: 'No grain',
+  beans: 'Beans',
+  soup: 'Soup',
+  salad: 'Salad',
+  none: 'No base',
   other: 'Other',
 };
 
-export const GRAIN_EMOJI: Record<Grain, string> = {
+export const BASE_EMOJI: Record<Base, string> = {
   rice: '🍚',
   pasta: '🍝',
   potato: '🥔',
   bread: '🍞',
   wrap: '🌯',
-  none: '🥗',
+  beans: '🫘',
+  soup: '🍲',
+  salad: '🥗',
+  none: '➖',
   other: '🍽️',
 };
 

@@ -3,7 +3,7 @@ import type { AppData, Recipe } from './types';
 import {
   daysSince,
   recipeWeight,
-  lastCookedGrain,
+  lastCookedBase,
   filterCandidates,
   suggest,
   BASE_NEW,
@@ -20,7 +20,7 @@ function isoDaysAgo(days: number): string {
 function recipe(partial: Partial<Recipe> & { id: string; name: string }): Recipe {
   return {
     sourceUrl: undefined,
-    grain: 'rice',
+    base: 'rice',
     mainIngredients: [],
     effort: 'quick',
     notes: undefined,
@@ -57,17 +57,17 @@ describe('recency weighting', () => {
 
 describe('filterCandidates', () => {
   const pool: Recipe[] = [
-    recipe({ id: 'a', name: 'Rice quick', grain: 'rice', effort: 'quick', mainIngredients: ['mushroom', 'spinach'] }),
-    recipe({ id: 'b', name: 'Pasta medium', grain: 'pasta', effort: 'medium', mainIngredients: ['mushroom'] }),
-    recipe({ id: 'c', name: 'Retired', grain: 'rice', active: false }),
+    recipe({ id: 'a', name: 'Rice quick', base: 'rice', effort: 'quick', mainIngredients: ['mushroom', 'spinach'] }),
+    recipe({ id: 'b', name: 'Pasta medium', base: 'pasta', effort: 'medium', mainIngredients: ['mushroom'] }),
+    recipe({ id: 'c', name: 'Retired', base: 'rice', active: false }),
   ];
 
   it('drops inactive recipes', () => {
     expect(filterCandidates(pool, {}).map((r) => r.id)).toEqual(['a', 'b']);
   });
 
-  it('avoidGrain excludes last night\'s grain', () => {
-    expect(filterCandidates(pool, { avoidGrain: 'rice' }).map((r) => r.id)).toEqual(['b']);
+  it('avoidBase excludes last night\'s base', () => {
+    expect(filterCandidates(pool, { avoidBase: 'rice' }).map((r) => r.id)).toEqual(['b']);
   });
 
   it('effort narrows the pool', () => {
@@ -86,23 +86,23 @@ describe('filterCandidates', () => {
   });
 });
 
-describe('lastCookedGrain', () => {
-  it('returns the grain of the most recently cooked recipe', () => {
+describe('lastCookedBase', () => {
+  it('returns the base of the most recently cooked recipe', () => {
     const data: AppData = {
       recipes: [
-        recipe({ id: 'a', name: 'A', grain: 'rice' }),
-        recipe({ id: 'b', name: 'B', grain: 'pasta' }),
+        recipe({ id: 'a', name: 'A', base: 'rice' }),
+        recipe({ id: 'b', name: 'B', base: 'pasta' }),
       ],
       cookLog: [
         { id: '1', recipeId: 'a', date: isoDaysAgo(3) },
         { id: '2', recipeId: 'b', date: isoDaysAgo(1) },
       ],
     };
-    expect(lastCookedGrain(data)).toBe('pasta');
+    expect(lastCookedBase(data)).toBe('pasta');
   });
 
   it('returns undefined when nothing has been cooked', () => {
-    expect(lastCookedGrain({ recipes: [], cookLog: [] })).toBeUndefined();
+    expect(lastCookedBase({ recipes: [], cookLog: [] })).toBeUndefined();
   });
 });
 

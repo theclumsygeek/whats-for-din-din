@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useData } from '../state/DataProvider';
-import type { Effort, Grain, Recipe } from '../lib/types';
-import { EFFORTS, EFFORT_LABEL, GRAINS } from '../lib/types';
+import type { Base, Effort, Recipe } from '../lib/types';
+import { EFFORTS, EFFORT_LABEL, BASES } from '../lib/types';
 import type { RecipeInput } from '../lib/supabase';
 import {
-  GRAIN_EMOJI,
-  GRAIN_LABEL,
+  BASE_EMOJI,
+  BASE_LABEL,
   isForgotten,
   lastCookedLabel,
 } from '../lib/format';
@@ -74,7 +74,7 @@ function RecipeRow({
         recipe.active ? '' : 'opacity-50'
       }`}
     >
-      <span className="text-2xl">{GRAIN_EMOJI[recipe.grain]}</span>
+      <span className="text-2xl">{BASE_EMOJI[recipe.base]}</span>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <p className="truncate font-bold">{recipe.name}</p>
@@ -85,7 +85,7 @@ function RecipeRow({
           )}
         </div>
         <p className="text-xs text-ink-soft dark:text-earth-100">
-          {GRAIN_LABEL[recipe.grain]} · {EFFORT_LABEL[recipe.effort]} ·{' '}
+          {BASE_LABEL[recipe.base]} · {EFFORT_LABEL[recipe.effort]} ·{' '}
           {lastCookedLabel(recipe)}
         </p>
       </div>
@@ -103,7 +103,7 @@ function RecipeRow({
 const BLANK: RecipeInput = {
   name: '',
   sourceUrl: '',
-  grain: 'rice',
+  base: 'rice',
   mainIngredients: [],
   effort: 'quick',
   notes: '',
@@ -122,7 +122,7 @@ function RecipeForm({
       ? {
           name: recipe.name,
           sourceUrl: recipe.sourceUrl ?? '',
-          grain: recipe.grain,
+          base: recipe.base,
           mainIngredients: recipe.mainIngredients,
           effort: recipe.effort,
           notes: recipe.notes ?? '',
@@ -207,16 +207,16 @@ function RecipeForm({
         />
       </Field>
 
-      <Field label="Grain">
+      <Field label="Base">
         <div className="flex flex-wrap gap-2">
-          {GRAINS.map((g) => (
+          {BASES.map((b) => (
             <button
-              key={g}
+              key={b}
               type="button"
-              className={form.grain === g ? 'chip-on' : 'chip-off'}
-              onClick={() => set('grain', g as Grain)}
+              className={form.base === b ? 'chip-on' : 'chip-off'}
+              onClick={() => set('base', b as Base)}
             >
-              {GRAIN_LABEL[g]}
+              {BASE_LABEL[b]}
             </button>
           ))}
         </div>

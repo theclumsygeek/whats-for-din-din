@@ -1,28 +1,28 @@
 import { useMemo, useState } from 'react';
 import { useData } from '../state/DataProvider';
-import { allIngredients, lastCookedGrain, suggest } from '../lib/suggest';
-import type { Effort, Grain, Recipe, SuggestFilters } from '../lib/types';
-import { EFFORTS, EFFORT_LABEL, GRAINS } from '../lib/types';
-import { GRAIN_EMOJI, GRAIN_LABEL, lastCookedLabel } from '../lib/format';
+import { allIngredients, lastCookedBase, suggest } from '../lib/suggest';
+import type { Base, Effort, Recipe, SuggestFilters } from '../lib/types';
+import { EFFORTS, EFFORT_LABEL, BASES } from '../lib/types';
+import { BASE_EMOJI, BASE_LABEL, lastCookedLabel } from '../lib/format';
 
 export function Tonight() {
   const { data, markCooked } = useData();
 
-  const autoAvoidGrain = useMemo(() => lastCookedGrain(data), [data]);
+  const autoAvoidBase = useMemo(() => lastCookedBase(data), [data]);
   const ingredients = useMemo(() => allIngredients(data.recipes), [data.recipes]);
 
-  const [avoidGrain, setAvoidGrain] = useState<Grain | undefined>(autoAvoidGrain);
+  const [avoidBase, setAvoidBase] = useState<Base | undefined>(autoAvoidBase);
   const [effort, setEffort] = useState<Effort | undefined>();
   const [useIngredients, setUseIngredients] = useState<string[]>([]);
   const [seed, setSeed] = useState(0); // bump to reroll
   const [cooking, setCooking] = useState(false);
 
-  const filters: SuggestFilters = { avoidGrain, effort, useIngredients };
+  const filters: SuggestFilters = { avoidBase, effort, useIngredients };
 
   const ranked = useMemo(
     () => suggest(data, filters, { count: 4 }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data, avoidGrain, effort, useIngredients, seed],
+    [data, avoidBase, effort, useIngredients, seed],
   );
 
   const [pick, ...alternates] = ranked;
@@ -38,7 +38,7 @@ export function Tonight() {
     setCooking(true);
     try {
       await markCooked(pick);
-      setAvoidGrain(pick.grain); // rotate away from tonight's grain next time
+      setAvoidBase(pick.base); // rotate away from tonight's base next time
       setSeed((s) => s + 1);
     } finally {
       setCooking(false);
@@ -54,8 +54,8 @@ export function Tonight() {
   return (
     <div className="space-y-5">
       <Filters
-        avoidGrain={avoidGrain}
-        setAvoidGrain={setAvoidGrain}
+        avoidBase={avoidBase}
+        setAvoidBase={setAvoidBase}
         effort={effort}
         setEffort={setEffort}
         ingredients={ingredients}
@@ -112,10 +112,10 @@ function SuggestionCard({ recipe }: { recipe: Recipe }) {
         Tonight's pick
       </div>
       <div className="p-5">
-        <div className="mb-1 text-4xl">{GRAIN_EMOJI[recipe.grain]}</div>
+        <div className="mb-1 text-4xl">{BASE_EMOJI[recipe.base]}</div>
         <h2 className="text-2xl font-extrabold leading-tight">{recipe.name}</h2>
         <div className="mt-2 flex flex-wrap gap-2">
-          <span className="chip-off">{GRAIN_LABEL[recipe.grain]}</span>
+          <span className="chip-off">{BASE_LABEL[recipe.base]}</span>
           <span className="chip-off">{EFFORT_LABEL[recipe.effort]}</span>
           <span className="chip-off">{lastCookedLabel(recipe)}</span>
         </div>
@@ -147,11 +147,11 @@ function SuggestionCard({ recipe }: { recipe: Recipe }) {
 function AlternateRow({ recipe }: { recipe: Recipe }) {
   return (
     <li className="card flex items-center gap-3 p-3">
-      <span className="text-2xl">{GRAIN_EMOJI[recipe.grain]}</span>
+      <span className="text-2xl">{BASE_EMOJI[recipe.base]}</span>
       <div className="min-w-0 flex-1">
         <p className="truncate font-bold">{recipe.name}</p>
         <p className="text-xs text-ink-soft dark:text-earth-100">
-          {GRAIN_LABEL[recipe.grain]} · {lastCookedLabel(recipe)}
+          {BASE_LABEL[recipe.base]} · {lastCookedLabel(recipe)}
         </p>
       </div>
       {recipe.sourceUrl && (
@@ -169,16 +169,16 @@ function AlternateRow({ recipe }: { recipe: Recipe }) {
 }
 
 function Filters({
-  avoidGrain,
-  setAvoidGrain,
+  avoidBase,
+  setAvoidBase,
   effort,
   setEffort,
   ingredients,
   useIngredients,
   toggleIngredient,
 }: {
-  avoidGrain: Grain | undefined;
-  setAvoidGrain: (g: Grain | undefined) => void;
+  avoidBase: Base | undefined;
+  setAvoidBase: (b: Base | undefined) => void;
   effort: Effort | undefined;
   setEffort: (e: Effort | undefined) => void;
   ingredients: string[];
@@ -187,15 +187,15 @@ function Filters({
 }) {
   return (
     <div className="card space-y-3 p-4">
-      <FilterRow label="Avoid grain">
-        {GRAINS.map((g) => (
+      <FilterRow label="Avoid base">
+        {BASES.map((b) => (
           <button
-            key={g}
+            key={b}
             type="button"
-            className={avoidGrain === g ? 'chip-on' : 'chip-off'}
-            onClick={() => setAvoidGrain(avoidGrain === g ? undefined : g)}
+            className={avoidBase === b ? 'chip-on' : 'chip-off'}
+            onClick={() => setAvoidBase(avoidBase === b ? undefined : b)}
           >
-            {GRAIN_LABEL[g]}
+            {BASE_LABEL[b]}
           </button>
         ))}
       </FilterRow>

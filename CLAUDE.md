@@ -50,7 +50,7 @@ The heart of the app, kept **pure and dependency-free** so it's unit-tested in i
   via `weightedShuffle`). Inject `rng`/`now` for determinism — a constant `rng` degrades
   it to a deterministic sort by weight, which the tests rely on.
 - Ingredient filtering is **strict ALL-match** (recipe must contain every selected
-  ingredient). Grain rotation is a hard exclude of `avoidGrain`.
+  ingredient). Base rotation is a hard exclude of `avoidBase`.
 - When changing weighting/filtering, update `suggest.test.ts` accordingly.
 
 ### UI

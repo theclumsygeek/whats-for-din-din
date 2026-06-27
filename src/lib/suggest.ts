@@ -1,4 +1,4 @@
-import type { AppData, Grain, Recipe, SuggestFilters } from './types';
+import type { AppData, Base, Recipe, SuggestFilters } from './types';
 
 /**
  * Weight assigned to a never-cooked recipe, expressed in "equivalent days since
@@ -30,14 +30,14 @@ export function recipeWeight(recipe: Recipe, now: Date): number {
   return 1 + Math.min(daysSince(recipe.lastCookedDate, now), MAX_DAYS);
 }
 
-/** Grain of the most recently cooked recipe, to auto-rotate away from it. */
-export function lastCookedGrain(data: AppData): Grain | undefined {
+/** Base of the most recently cooked recipe, to auto-rotate away from it. */
+export function lastCookedBase(data: AppData): Base | undefined {
   if (data.cookLog.length === 0) return undefined;
   const latest = data.cookLog.reduce((a, b) => (b.date > a.date ? b : a));
-  return data.recipes.find((r) => r.id === latest.recipeId)?.grain;
+  return data.recipes.find((r) => r.id === latest.recipeId)?.base;
 }
 
-/** Apply the active + grain + effort + (strict ALL-match) ingredient filters. */
+/** Apply the active + base + effort + (strict ALL-match) ingredient filters. */
 export function filterCandidates(
   recipes: Recipe[],
   filters: SuggestFilters,
@@ -48,7 +48,7 @@ export function filterCandidates(
 
   return recipes.filter((r) => {
     if (!r.active) return false;
-    if (filters.avoidGrain && r.grain === filters.avoidGrain) return false;
+    if (filters.avoidBase && r.base === filters.avoidBase) return false;
     if (filters.effort && r.effort !== filters.effort) return false;
     if (needed.length > 0) {
       const have = new Set(r.mainIngredients.map(normalizeIngredient));

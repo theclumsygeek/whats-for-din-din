@@ -5,7 +5,7 @@ Built for whole-food plant-based (WFPB) cooking and the Well Your World rotation
 
 Its #1 job: **stop forgetting your favorites.** Suggestions are weighted by how long
 it's been since you cooked something, so dishes that have slipped out of rotation keep
-resurfacing. Layer on grain rotation (auto-avoids last night's grain), a mood/effort
+resurfacing. Layer on base rotation (auto-avoids last night's base), a mood/effort
 filter, and a strict "use these ingredients" filter, then tap **Surprise me** →
 **Cooked it**.
 
@@ -71,18 +71,18 @@ See [`src/lib/suggest.ts`](src/lib/suggest.ts) (pure + unit-tested):
 
 - **Recency weight** — `1 + days since last cooked`, capped; never-cooked recipes get a
   high baseline. Longer-untouched ⇒ more likely to be suggested.
-- **Filters** — active only, exclude `avoidGrain`, optional `effort`, and **ALL-match**
+- **Filters** — active only, exclude `avoidBase`, optional `effort`, and **ALL-match**
   ingredients (a recipe must contain *every* selected ingredient).
 - **Weighted random draw** — biased toward forgotten favorites, but varied so
   "Surprise me" gives a fresh pick each tap.
 
 Marking **Cooked it** stamps `last_cooked_date`, bumps `times_cooked`, logs the cook,
-and rotates the grain filter away from what you just made.
+and rotates the base filter away from what you just made.
 
 ---
 
 ## Deferred / ideas
 
 - Offline **writes** (queued mutations) — today writes need connectivity.
-- A **Week** view that generates a 7-night menu, auto-rotating grains.
+- A **Week** view that generates a 7-night menu, auto-rotating bases.
 - A maintained pantry inventory (vs. per-search ingredient filtering).

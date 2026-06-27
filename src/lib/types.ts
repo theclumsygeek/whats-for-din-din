@@ -1,13 +1,16 @@
-export const GRAINS = [
+export const BASES = [
   'rice',
   'pasta',
   'potato',
   'bread',
   'wrap',
+  'beans',
+  'soup',
+  'salad',
   'none',
   'other',
 ] as const;
-export type Grain = (typeof GRAINS)[number];
+export type Base = (typeof BASES)[number];
 
 export const EFFORTS = ['quick', 'medium', 'project'] as const;
 export type Effort = (typeof EFFORTS)[number];
@@ -22,7 +25,7 @@ export interface Recipe {
   id: string;
   name: string;
   sourceUrl?: string;
-  grain: Grain;
+  base: Base;
   mainIngredients: string[];
   effort: Effort;
   notes?: string;
@@ -44,8 +47,8 @@ export interface AppData {
 
 /** Filters the user can apply when asking for a suggestion. */
 export interface SuggestFilters {
-  /** Exclude recipes using this grain (auto-set to last night's grain). */
-  avoidGrain?: Grain;
+  /** Exclude recipes using this base (auto-set to last night's base). */
+  avoidBase?: Base;
   /** Only recipes matching this effort/mood level. */
   effort?: Effort;
   /** Recipe must contain EVERY one of these ingredients (strict / ALL match). */
