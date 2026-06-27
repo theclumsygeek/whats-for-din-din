@@ -26,7 +26,7 @@ function Main() {
     <div className="mx-auto flex min-h-full max-w-md flex-col">
       <header className="sticky top-0 z-10 flex items-center justify-between bg-earth-50/80 px-4 py-3 backdrop-blur dark:bg-ink/80">
         <h1 className="text-lg font-extrabold text-brand-800 dark:text-brand-200">
-          🍲 Din-Din
+          🍲 What's for Din-Din?
         </h1>
         <div className="flex items-center gap-1">
           <ThemeToggle />

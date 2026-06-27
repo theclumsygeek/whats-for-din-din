@@ -1,88 +1,69 @@
-# What's for Din-Din 🍲
+# What's for Din-Din? 🍲
 
-A tiny, phone-friendly PWA that decides **what's for dinner** so you don't have to.
-Built for whole-food plant-based (WFPB) cooking and the Well Your World rotation.
+Can't decide what to cook tonight? Tap the app and let it pick for you. It leans toward
+the meals you **haven't made in a while**, so your favorites stop slipping out of
+rotation. Built for whole-food plant-based (WFPB) dinners.
 
-Its #1 job: **stop forgetting your favorites.** Suggestions are weighted by how long
-it's been since you cooked something, so dishes that have slipped out of rotation keep
-resurfacing. Layer on base rotation (auto-avoids last night's base), a mood/effort
-filter, and a strict "use these ingredients" filter, then tap **Surprise me** →
-**Cooked it**.
+📱 Open it on your phone and **Add to Home Screen** — it installs like a real app and
+works offline.
 
-- **Frontend:** Vite + React + TypeScript + Tailwind, installable as a PWA
-- **Backend:** Supabase (Postgres + email/password auth + Row-Level Security)
-- **Hosting:** GitHub Pages (free, public repo)
-
-The recipe data is small, so the app fetches everything once, caches it in
-`localStorage` for instant/offline reads, and runs the suggestion engine in the browser.
+> First time setting it up, or running your own copy? See the
+> [setup & deployment guide](SETUP.md).
 
 ---
 
-## Local development
+## Getting in
 
-```bash
-npm install
-cp .env.example .env.local   # then fill in your Supabase URL + anon key
-npm run dev                  # http://localhost:5173/whats-for-din-din/
-npm run test                 # suggestion-engine unit tests
-npm run build                # type-check + production build
-```
-
-> The dev URL includes the `/whats-for-din-din/` base path (matches GitHub Pages).
+The app is private — you sign in with the email and password you were given. There's no
+public sign-up. Once you're in, you land on the **Tonight** screen.
 
 ---
 
-## One-time setup
+## Tonight — get a dinner pick
 
-### 1. Supabase (database + auth)
+This is where you decide what's for din-din.
 
-1. Create a free project at [supabase.com](https://supabase.com).
-2. **SQL Editor → New query** → paste [`supabase/schema.sql`](supabase/schema.sql) →
-   **Run**. (Optionally run [`supabase/seed.sql`](supabase/seed.sql) for sample recipes.)
-3. **Authentication → Providers → Email:** make sure Email is enabled, and turn
-   **"Allow new users to sign up" OFF** (so only the accounts you create can get in).
-4. **Authentication → Users → Add user → Create new user:** create your two accounts,
-   each with an email + password and **Auto Confirm User** ticked. (This avoids the
-   built-in mailer's low rate limit — no email is sent. Login uses the password.)
-5. **Project Settings → API:** copy the **Project URL** and **anon public** key into
-   `.env.local` (and into GitHub secrets below). The anon key is safe to expose — RLS
-   only lets authenticated users read or write.
+- **Tonight's pick** — the big card at the top is the app's suggestion. It shows the
+  base, the effort level, when you last made it, the main ingredients, and a link to the
+  recipe if there is one.
+- **🎲 Surprise me** — don't love the pick? Tap to draw a fresh suggestion. Each tap
+  reshuffles, so keep tapping until something sounds good.
+- **✅ Cooked it** — made this tonight? Tap to record it. The app remembers the date so
+  this dish won't resurface for a while, and it steers your next pick toward a different
+  base.
+- **Or maybe…** — a few runner-up ideas under the pick. **Tap any of them to promote it
+  to tonight's pick** — it jumps up to the big card and the others reshuffle below.
 
-### 2. GitHub Pages (hosting)
+### Narrow it down
 
-1. Push this repo to GitHub (public repo = free Pages).
-2. **Settings → Secrets and variables → Actions → New repository secret**, add:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
-3. **Settings → Pages → Build and deployment → Source: GitHub Actions.**
-4. Push to `main` (or run the workflow manually). The
-   [deploy workflow](.github/workflows/deploy.yml) tests, builds, and publishes.
-5. Your app lives at `https://<you>.github.io/whats-for-din-din/`. Open it on your
-   phone and **Add to Home Screen** to install the PWA.
+Above the pick are quick filters:
 
-> **Renamed the repo?** The Vite `base` defaults to `/whats-for-din-din/`. Set a
-> `BASE_PATH` env var (e.g. `/<new-repo>/`, or `/` for a custom domain) at build time.
+- **Avoid base** — skip a base you don't feel like (rice, noodles, etc.). The app
+  auto-avoids whatever you cooked last night, but you can change it.
+- **Effort** — pick a mood: quick, medium, or a project for the weekend.
+- **Use these (all)** — tap to expand, then choose ingredients you want to cook with.
+  Only recipes that contain **every** ingredient you pick will be suggested. (Collapsed
+  by default to keep the screen tidy.)
 
 ---
 
-## How suggestions work
+## Recipes — your cookbook
 
-See [`src/lib/suggest.ts`](src/lib/suggest.ts) (pure + unit-tested):
-
-- **Recency weight** — `1 + days since last cooked`, capped; never-cooked recipes get a
-  high baseline. Longer-untouched ⇒ more likely to be suggested.
-- **Filters** — active only, exclude `avoidBase`, optional `effort`, and **ALL-match**
-  ingredients (a recipe must contain *every* selected ingredient).
-- **Weighted random draw** — biased toward forgotten favorites, but varied so
-  "Surprise me" gives a fresh pick each tap.
-
-Marking **Cooked it** stamps `last_cooked_date`, bumps `times_cooked`, logs the cook,
-and rotates the base filter away from what you just made.
+The **Recipes** tab is your full list. Add a new favorite, edit details, or remove ones
+you've gone off. Each recipe can have a base, effort level, main ingredients, notes, and
+a link to the original recipe — that's the info the Tonight screen uses to make smart
+picks.
 
 ---
 
-## Deferred / ideas
+## Tips
 
-- Offline **writes** (queued mutations) — today writes need connectivity.
-- A **Week** view that generates a 7-night menu, auto-rotating bases.
-- A maintained pantry inventory (vs. per-search ingredient filtering).
+- **The more you tap "Cooked it," the smarter it gets.** Logging your cooks is what lets
+  the app surface forgotten favorites and rotate your bases.
+- **Add to Home Screen** for the app-like, full-screen experience.
+- **Dark mode** is in the top corner toggle.
+
+---
+
+*Want to run your own copy, change how suggestions are weighted, or deploy it? The
+technical details live in [SETUP.md](SETUP.md).*

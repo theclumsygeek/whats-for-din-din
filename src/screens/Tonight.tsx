@@ -19,13 +19,28 @@ export function Tonight() {
 
   const filters: SuggestFilters = { avoidBase, effort, useIngredients };
 
+  const [selectedId, setSelectedId] = useState<string | undefined>();
+
   const ranked = useMemo(
     () => suggest(data, filters, { count: 4 }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data, avoidBase, effort, useIngredients, seed],
   );
 
-  const [pick, ...alternates] = ranked;
+  // A tap on an alternate promotes it to tonight's pick; otherwise the
+  // engine's top result leads.
+  const ordered = useMemo(() => {
+    const chosen = selectedId && ranked.find((r) => r.id === selectedId);
+    if (!chosen) return ranked;
+    return [chosen, ...ranked.filter((r) => r.id !== chosen.id)];
+  }, [ranked, selectedId]);
+
+  const [pick, ...alternates] = ordered;
+
+  function reroll() {
+    setSelectedId(undefined);
+    setSeed((s) => s + 1);
+  }
 
   function toggleIngredient(i: string) {
     setUseIngredients((prev) =>
@@ -39,6 +54,7 @@ export function Tonight() {
     try {
       await markCooked(pick);
       setAvoidBase(pick.base); // rotate away from tonight's base next time
+      setSelectedId(undefined);
       setSeed((s) => s + 1);
     } finally {
       setCooking(false);
@@ -74,7 +90,7 @@ export function Tonight() {
       <div className="grid grid-cols-2 gap-3">
         <button
           type="button"
-          onClick={() => setSeed((s) => s + 1)}
+          onClick={reroll}
           className="btn-ghost"
         >
           🎲 Surprise me
@@ -96,7 +112,7 @@ export function Tonight() {
           </h3>
           <ul className="space-y-2">
             {alternates.map((r) => (
-              <AlternateRow key={r.id} recipe={r} />
+              <AlternateRow key={r.id} recipe={r} onPick={() => setSelectedId(r.id)} />
             ))}
           </ul>
         </div>
@@ -144,16 +160,23 @@ function SuggestionCard({ recipe }: { recipe: Recipe }) {
   );
 }
 
-function AlternateRow({ recipe }: { recipe: Recipe }) {
+function AlternateRow({ recipe, onPick }: { recipe: Recipe; onPick: () => void }) {
   return (
     <li className="card flex items-center gap-3 p-3">
-      <span className="text-2xl">{BASE_EMOJI[recipe.base]}</span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-bold">{recipe.name}</p>
-        <p className="text-xs text-ink-soft dark:text-earth-100">
-          {BASE_LABEL[recipe.base]} · {lastCookedLabel(recipe)}
-        </p>
-      </div>
+      <button
+        type="button"
+        onClick={onPick}
+        className="flex min-w-0 flex-1 items-center gap-3 text-left"
+        title="Make this tonight's pick"
+      >
+        <span className="text-2xl">{BASE_EMOJI[recipe.base]}</span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-bold">{recipe.name}</p>
+          <p className="text-xs text-ink-soft dark:text-earth-100">
+            {BASE_LABEL[recipe.base]} · {lastCookedLabel(recipe)}
+          </p>
+        </div>
+      </button>
       {recipe.sourceUrl && (
         <a
           href={recipe.sourceUrl}
@@ -185,6 +208,8 @@ function Filters({
   useIngredients: string[];
   toggleIngredient: (i: string) => void;
 }) {
+  const [showIngredients, setShowIngredients] = useState(false);
+
   return (
     <div className="card space-y-3 p-4">
       <FilterRow label="Avoid base">
@@ -214,18 +239,37 @@ function Filters({
       </FilterRow>
 
       {ingredients.length > 0 && (
-        <FilterRow label="Use these (all)">
-          {ingredients.map((i) => (
-            <button
-              key={i}
-              type="button"
-              className={useIngredients.includes(i) ? 'chip-on' : 'chip-off'}
-              onClick={() => toggleIngredient(i)}
-            >
-              {i}
-            </button>
-          ))}
-        </FilterRow>
+        <div>
+          <button
+            type="button"
+            onClick={() => setShowIngredients((s) => !s)}
+            className="flex w-full items-center justify-between text-xs font-bold uppercase tracking-wide text-ink-soft dark:text-earth-100"
+          >
+            <span>
+              Use these (all)
+              {useIngredients.length > 0 && (
+                <span className="ml-1 normal-case text-brand-600 dark:text-brand-300">
+                  · {useIngredients.length} selected
+                </span>
+              )}
+            </span>
+            <span aria-hidden>{showIngredients ? '▴' : '▾'}</span>
+          </button>
+          {showIngredients && (
+            <div className="mt-1.5 flex flex-wrap gap-2">
+              {ingredients.map((i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className={useIngredients.includes(i) ? 'chip-on' : 'chip-off'}
+                  onClick={() => toggleIngredient(i)}
+                >
+                  {i}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

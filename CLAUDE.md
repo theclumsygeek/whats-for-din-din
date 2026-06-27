@@ -76,4 +76,5 @@ The heart of the app, kept **pure and dependency-free** so it's unit-tested in i
   at build time (`/` for a custom domain). The PWA manifest `start_url`/`scope` derive
   from this base, so keep them aligned.
 
-See `README.md` for the full Supabase + Pages one-time setup.
+See `SETUP.md` for the full Supabase + Pages one-time setup (`README.md` is the
+user-facing usage guide).

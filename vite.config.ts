@@ -13,9 +13,9 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: "What's for Din-Din",
+        name: "What's for Din-Din?",
         short_name: 'Din-Din',
         description: 'A WFPB meal decider that resurfaces forgotten favorites.',
         theme_color: '#2f7d4f',
@@ -24,11 +24,32 @@ export default defineConfig({
         start_url: base,
         scope: base,
         icons: [
+          // Chrome/Android only treats the app as installable when it finds
+          // raster PNG icons at 192 and 512 — an SVG-only set hides the
+          // "Install app" / "Add to Home Screen" entry.
+          {
+            src: 'pwa-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: 'pwa-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: 'pwa-maskable-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
           {
             src: 'favicon.svg',
             sizes: 'any',
             type: 'image/svg+xml',
-            purpose: 'any maskable',
+            purpose: 'any',
           },
         ],
       },
