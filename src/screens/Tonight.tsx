@@ -1,0 +1,262 @@
+import { useMemo, useState } from 'react';
+import { useData } from '../state/DataProvider';
+import { allIngredients, lastCookedGrain, suggest } from '../lib/suggest';
+import type { Effort, Grain, Recipe, SuggestFilters } from '../lib/types';
+import { EFFORTS, EFFORT_LABEL, GRAINS } from '../lib/types';
+import { GRAIN_EMOJI, GRAIN_LABEL, lastCookedLabel } from '../lib/format';
+
+export function Tonight() {
+  const { data, markCooked } = useData();
+
+  const autoAvoidGrain = useMemo(() => lastCookedGrain(data), [data]);
+  const ingredients = useMemo(() => allIngredients(data.recipes), [data.recipes]);
+
+  const [avoidGrain, setAvoidGrain] = useState<Grain | undefined>(autoAvoidGrain);
+  const [effort, setEffort] = useState<Effort | undefined>();
+  const [useIngredients, setUseIngredients] = useState<string[]>([]);
+  const [seed, setSeed] = useState(0); // bump to reroll
+  const [cooking, setCooking] = useState(false);
+
+  const filters: SuggestFilters = { avoidGrain, effort, useIngredients };
+
+  const ranked = useMemo(
+    () => suggest(data, filters, { count: 4 }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [data, avoidGrain, effort, useIngredients, seed],
+  );
+
+  const [pick, ...alternates] = ranked;
+
+  function toggleIngredient(i: string) {
+    setUseIngredients((prev) =>
+      prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i],
+    );
+  }
+
+  async function cookedIt() {
+    if (!pick) return;
+    setCooking(true);
+    try {
+      await markCooked(pick);
+      setAvoidGrain(pick.grain); // rotate away from tonight's grain next time
+      setSeed((s) => s + 1);
+    } finally {
+      setCooking(false);
+    }
+  }
+
+  if (data.recipes.length === 0) {
+    return (
+      <EmptyState />
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      <Filters
+        avoidGrain={avoidGrain}
+        setAvoidGrain={setAvoidGrain}
+        effort={effort}
+        setEffort={setEffort}
+        ingredients={ingredients}
+        useIngredients={useIngredients}
+        toggleIngredient={toggleIngredient}
+      />
+
+      {pick ? (
+        <SuggestionCard recipe={pick} />
+      ) : (
+        <div className="card p-6 text-center text-ink-soft dark:text-earth-100">
+          No recipes match those filters. Try loosening them.
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          onClick={() => setSeed((s) => s + 1)}
+          className="btn-ghost"
+        >
+          🎲 Surprise me
+        </button>
+        <button
+          type="button"
+          onClick={cookedIt}
+          disabled={!pick || cooking}
+          className="btn-primary"
+        >
+          {cooking ? 'Saving…' : '✅ Cooked it'}
+        </button>
+      </div>
+
+      {alternates.length > 0 && (
+        <div>
+          <h3 className="mb-2 px-1 text-sm font-bold text-ink-soft dark:text-earth-100">
+            Or maybe…
+          </h3>
+          <ul className="space-y-2">
+            {alternates.map((r) => (
+              <AlternateRow key={r.id} recipe={r} />
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SuggestionCard({ recipe }: { recipe: Recipe }) {
+  return (
+    <div className="card overflow-hidden">
+      <div className="bg-brand-600 px-5 py-2 text-xs font-bold uppercase tracking-wide text-white">
+        Tonight's pick
+      </div>
+      <div className="p-5">
+        <div className="mb-1 text-4xl">{GRAIN_EMOJI[recipe.grain]}</div>
+        <h2 className="text-2xl font-extrabold leading-tight">{recipe.name}</h2>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <span className="chip-off">{GRAIN_LABEL[recipe.grain]}</span>
+          <span className="chip-off">{EFFORT_LABEL[recipe.effort]}</span>
+          <span className="chip-off">{lastCookedLabel(recipe)}</span>
+        </div>
+        {recipe.mainIngredients.length > 0 && (
+          <p className="mt-3 text-sm text-ink-soft dark:text-earth-100">
+            {recipe.mainIngredients.join(' · ')}
+          </p>
+        )}
+        {recipe.notes && (
+          <p className="mt-2 text-sm italic text-ink-soft dark:text-earth-100">
+            {recipe.notes}
+          </p>
+        )}
+        {recipe.sourceUrl && (
+          <a
+            href={recipe.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-3 inline-block font-bold text-brand-600 hover:underline dark:text-brand-300"
+          >
+            View recipe ↗
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AlternateRow({ recipe }: { recipe: Recipe }) {
+  return (
+    <li className="card flex items-center gap-3 p-3">
+      <span className="text-2xl">{GRAIN_EMOJI[recipe.grain]}</span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-bold">{recipe.name}</p>
+        <p className="text-xs text-ink-soft dark:text-earth-100">
+          {GRAIN_LABEL[recipe.grain]} · {lastCookedLabel(recipe)}
+        </p>
+      </div>
+      {recipe.sourceUrl && (
+        <a
+          href={recipe.sourceUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="text-sm font-bold text-brand-600 dark:text-brand-300"
+        >
+          ↗
+        </a>
+      )}
+    </li>
+  );
+}
+
+function Filters({
+  avoidGrain,
+  setAvoidGrain,
+  effort,
+  setEffort,
+  ingredients,
+  useIngredients,
+  toggleIngredient,
+}: {
+  avoidGrain: Grain | undefined;
+  setAvoidGrain: (g: Grain | undefined) => void;
+  effort: Effort | undefined;
+  setEffort: (e: Effort | undefined) => void;
+  ingredients: string[];
+  useIngredients: string[];
+  toggleIngredient: (i: string) => void;
+}) {
+  return (
+    <div className="card space-y-3 p-4">
+      <FilterRow label="Avoid grain">
+        {GRAINS.map((g) => (
+          <button
+            key={g}
+            type="button"
+            className={avoidGrain === g ? 'chip-on' : 'chip-off'}
+            onClick={() => setAvoidGrain(avoidGrain === g ? undefined : g)}
+          >
+            {GRAIN_LABEL[g]}
+          </button>
+        ))}
+      </FilterRow>
+
+      <FilterRow label="Effort">
+        {EFFORTS.map((e) => (
+          <button
+            key={e}
+            type="button"
+            className={effort === e ? 'chip-on' : 'chip-off'}
+            onClick={() => setEffort(effort === e ? undefined : e)}
+          >
+            {EFFORT_LABEL[e]}
+          </button>
+        ))}
+      </FilterRow>
+
+      {ingredients.length > 0 && (
+        <FilterRow label="Use these (all)">
+          {ingredients.map((i) => (
+            <button
+              key={i}
+              type="button"
+              className={useIngredients.includes(i) ? 'chip-on' : 'chip-off'}
+              onClick={() => toggleIngredient(i)}
+            >
+              {i}
+            </button>
+          ))}
+        </FilterRow>
+      )}
+    </div>
+  );
+}
+
+function FilterRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-ink-soft dark:text-earth-100">
+        {label}
+      </p>
+      <div className="flex flex-wrap gap-2">{children}</div>
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="card mt-6 p-6 text-center">
+      <div className="mb-2 text-4xl">📖</div>
+      <h2 className="text-lg font-bold">No recipes yet</h2>
+      <p className="mt-1 text-sm text-ink-soft dark:text-earth-100">
+        Head to the <strong>Recipes</strong> tab and add your favorites — then
+        come back and tap Surprise me.
+      </p>
+    </div>
+  );
+}
