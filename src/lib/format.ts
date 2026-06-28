@@ -38,9 +38,14 @@ export function lastCookedLabel(recipe: Recipe, now = new Date()): string {
   return `Made ${Math.round(d / 30)} months ago`;
 }
 
-/** True when a recipe is "forgotten" — worth highlighting in the list. */
+/** True when a recipe has never been cooked — worth highlighting as new. */
+export function isNew(recipe: Recipe): boolean {
+  return recipe.active && !recipe.lastCookedDate;
+}
+
+/** True when a recipe is "forgotten" — cooked before, but not in a while. */
 export function isForgotten(recipe: Recipe, now = new Date()): boolean {
   if (!recipe.active) return false;
-  if (!recipe.lastCookedDate) return true;
+  if (!recipe.lastCookedDate) return false;
   return daysSince(recipe.lastCookedDate, now) >= 21;
 }
