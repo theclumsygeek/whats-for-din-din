@@ -44,6 +44,10 @@ npm run build                # type-check + production build
 5. **Project Settings → API:** copy the **Project URL** and **anon public** key into
    `.env.local` (and into GitHub secrets below). The anon key is safe to expose — RLS
    only lets authenticated users read or write.
+6. *(Optional, for local backups)* **Settings → API Keys → create a Secret key**
+   (`sb_secret_…`), and add it to `.env.local` as `SUPABASE_SECRET_KEY`. This bypasses
+   RLS so `npm run backup` can dump your data — keep it out of git and out of the client
+   (it's not `VITE_`-prefixed, so it never ships). See [Backups](#backups) below.
 
 ### 2. GitHub Pages (hosting)
 
@@ -75,6 +79,21 @@ See [`src/lib/suggest.ts`](src/lib/suggest.ts) (pure + unit-tested):
 
 Marking **Cooked it** stamps `last_cooked_date`, bumps `times_cooked`, logs the cook,
 and rotates the base filter away from what you just made.
+
+---
+
+## Backups
+
+Supabase's free tier has no automated backups, so take your own. With a
+`SUPABASE_SECRET_KEY` set in `.env.local` (see step 6 above):
+
+```bash
+npm run backup   # writes backups/dindin-<timestamp>.json (recipes + cook_log)
+```
+
+The `backups/` folder is git-ignored — the repo is public, so your data must never be
+committed. To run it automatically, schedule `npm run backup` (e.g. Windows Task
+Scheduler / cron); from there you can sync the JSON to your own private storage.
 
 ---
 

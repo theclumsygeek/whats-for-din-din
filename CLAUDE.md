@@ -10,6 +10,7 @@ npm run build        # tsc -b (type-check) + vite build -> dist/
 npm run test         # vitest run (one-shot)
 npm run test:watch   # vitest watch mode
 npm run preview      # serve the production build locally
+npm run backup       # dump recipes + cook_log to a timestamped JSON in backups/
 ```
 
 Run a single test file or case:
@@ -75,6 +76,10 @@ The heart of the app, kept **pure and dependency-free** so it's unit-tested in i
 - Vite `base` defaults to `/whats-for-din-din/`; if the repo is renamed, set `BASE_PATH`
   at build time (`/` for a custom domain). The PWA manifest `start_url`/`scope` derive
   from this base, so keep them aligned.
+- **Backups** (`scripts/backup.mjs`, `npm run backup`) read `SUPABASE_SECRET_KEY` (a
+  Secret API key, `sb_secret_…`) from `.env.local` to bypass RLS and dump both tables to
+  `backups/` (git-ignored). This key is *not* `VITE_`-prefixed, so it never reaches the
+  client bundle — keep it local. The repo is public, so backup JSON must stay out of git.
 
 See `SETUP.md` for the full Supabase + Pages one-time setup (`README.md` is the
 user-facing usage guide).

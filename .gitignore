@@ -7,6 +7,9 @@ dist-ssr
 .env.*
 !.env.example
 
+# Local data backups (npm run backup) — keep your data out of the public repo
+backups/
+
 # Editor / OS
 .DS_Store
 .vscode/*
