@@ -6,6 +6,8 @@ import type { RecipeInput } from '../lib/supabase';
 import {
   BASE_EMOJI,
   BASE_LABEL,
+  cookCountLabel,
+  isFavorite,
   isForgotten,
   isNew,
   lastCookedLabel,
@@ -70,6 +72,8 @@ function RecipeRow({
 }) {
   const forgotten = isForgotten(recipe);
   const fresh = isNew(recipe);
+  const favorite = isFavorite(recipe);
+  const countLabel = cookCountLabel(recipe);
   return (
     <li
       className={`card flex items-center gap-3 p-3 ${
@@ -85,6 +89,11 @@ function RecipeRow({
               New
             </span>
           )}
+          {favorite && (
+            <span className="shrink-0 rounded-full bg-brand-600 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
+              ★ Favorite
+            </span>
+          )}
           {forgotten && (
             <span className="shrink-0 rounded-full bg-earth-200 px-2 py-0.5 text-[10px] font-bold uppercase text-earth-400 dark:bg-brand-900/50 dark:text-brand-200">
               Forgotten
@@ -94,6 +103,7 @@ function RecipeRow({
         <p className="text-xs text-ink-soft dark:text-earth-100">
           {BASE_LABEL[recipe.base]} · {EFFORT_LABEL[recipe.effort]} ·{' '}
           {lastCookedLabel(recipe)}
+          {countLabel && ` · ${countLabel.toLowerCase()}`}
         </p>
       </div>
       <button

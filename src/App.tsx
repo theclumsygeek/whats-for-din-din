@@ -5,8 +5,9 @@ import { DataProvider, useData } from './state/DataProvider';
 import { signOut } from './lib/supabase';
 import { Tonight } from './screens/Tonight';
 import { Recipes } from './screens/Recipes';
+import { History } from './screens/History';
 
-type Tab = 'tonight' | 'recipes';
+type Tab = 'tonight' | 'recipes' | 'history';
 
 export default function App() {
   return (
@@ -47,7 +48,9 @@ function Main() {
       )}
 
       <main className="flex-1 px-4 pb-28 pt-2">
-        {tab === 'tonight' ? <Tonight /> : <Recipes />}
+        {tab === 'tonight' && <Tonight />}
+        {tab === 'recipes' && <Recipes />}
+        {tab === 'history' && <History />}
         {loading && (
           <p className="mt-4 text-center text-xs text-ink-soft dark:text-earth-100">
             Syncing…
@@ -58,6 +61,7 @@ function Main() {
       <nav className="fixed inset-x-0 bottom-0 z-10 mx-auto flex max-w-md justify-around border-t border-earth-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur dark:border-ink-soft dark:bg-ink/95">
         <TabButton active={tab === 'tonight'} onClick={() => setTab('tonight')} icon="🍽️" label="Tonight" />
         <TabButton active={tab === 'recipes'} onClick={() => setTab('recipes')} icon="📖" label="Recipes" />
+        <TabButton active={tab === 'history'} onClick={() => setTab('history')} icon="🗓️" label="History" />
       </nav>
     </div>
   );

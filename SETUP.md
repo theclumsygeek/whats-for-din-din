@@ -71,7 +71,15 @@ npm run build                # type-check + production build
 See [`src/lib/suggest.ts`](src/lib/suggest.ts) (pure + unit-tested):
 
 - **Recency weight** — `1 + days since last cooked`, capped; never-cooked recipes get a
-  high baseline. Longer-untouched ⇒ more likely to be suggested.
+  high baseline. Longer-untouched ⇒ more likely to be suggested. **Recency is primary.**
+- **Frequency boost** — a mild, capped, logarithmic multiplier from `times_cooked`
+  (`FREQ_K` / `MAX_FREQ_BOOST`) so historical favorites bubble up *among already-forgotten*
+  recipes. A much-cooked dish made yesterday still has recency ≈ 1, so it stays buried;
+  never-cooked recipes have `times_cooked = 0`, so the boost is exactly 1.
+- **Multi-night base rotation** — beyond the hard `avoidBase` (last night's base), the
+  bases of the last `RECENT_BASE_NIGHTS` cook-log entries get a soft `BASE_REPEAT_PENALTY`
+  on their weight, so the week doesn't lean on one base. It's a penalty, not a filter, so
+  the candidate pool never empties.
 - **Filters** — active only, exclude `avoidBase`, optional `effort`, and **ALL-match**
   ingredients (a recipe must contain *every* selected ingredient).
 - **Weighted random draw** — biased toward forgotten favorites, but varied so
@@ -79,6 +87,11 @@ See [`src/lib/suggest.ts`](src/lib/suggest.ts) (pure + unit-tested):
 
 Marking **Cooked it** stamps `last_cooked_date`, bumps `times_cooked`, logs the cook,
 and rotates the base filter away from what you just made.
+
+> **`times_cooked` vs. `cook_log`:** `times_cooked` is a denormalized cache of the
+> per-recipe `cook_log` row count, kept in sync by the **Cooked it** mutation. If you
+> hand-edit or delete log rows, reconcile the counter (or treat the log as the source of
+> truth) to avoid drift.
 
 ---
 

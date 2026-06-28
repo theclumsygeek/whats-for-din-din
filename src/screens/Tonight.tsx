@@ -3,7 +3,7 @@ import { useData } from '../state/DataProvider';
 import { allIngredients, lastCookedBase, suggest } from '../lib/suggest';
 import type { Base, Effort, Recipe, SuggestFilters } from '../lib/types';
 import { EFFORTS, EFFORT_LABEL, BASES } from '../lib/types';
-import { BASE_EMOJI, BASE_LABEL, lastCookedLabel } from '../lib/format';
+import { BASE_EMOJI, BASE_LABEL, cookCountLabel, lastCookedLabel } from '../lib/format';
 
 export function Tonight() {
   const { data, markCooked } = useData();
@@ -134,6 +134,9 @@ function SuggestionCard({ recipe }: { recipe: Recipe }) {
           <span className="chip-off">{BASE_LABEL[recipe.base]}</span>
           <span className="chip-off">{EFFORT_LABEL[recipe.effort]}</span>
           <span className="chip-off">{lastCookedLabel(recipe)}</span>
+          {recipe.timesCooked > 0 && (
+            <span className="chip-off">{cookCountLabel(recipe)}</span>
+          )}
         </div>
         {recipe.mainIngredients.length > 0 && (
           <p className="mt-3 text-sm text-ink-soft dark:text-earth-100">

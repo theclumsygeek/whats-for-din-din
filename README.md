@@ -24,8 +24,8 @@ public sign-up. Once you're in, you land on the **Tonight** screen.
 This is where you decide what's for din-din.
 
 - **Tonight's pick** — the big card at the top is the app's suggestion. It shows the
-  base, the effort level, when you last made it, the main ingredients, and a link to the
-  recipe if there is one.
+  base, the effort level, when you last made it, how many times you've cooked it, the
+  main ingredients, and a link to the recipe if there is one.
 - **🎲 Surprise me** — don't love the pick? Tap to draw a fresh suggestion. Each tap
   reshuffles, so keep tapping until something sounds good.
 - **✅ Cooked it** — made this tonight? Tap to record it. The app remembers the date so
@@ -52,14 +52,24 @@ Above the pick are quick filters:
 The **Recipes** tab is your full list. Add a new favorite, edit details, or remove ones
 you've gone off. Each recipe can have a base, effort level, main ingredients, notes, and
 a link to the original recipe — that's the info the Tonight screen uses to make smart
-picks.
+picks. Recipes are badged **New** (never made), **★ Favorite** (cooked often), and
+**Forgotten** (not made in a while) at a glance.
+
+---
+
+## History — what you've been cooking
+
+The **History** tab is a reverse-chronological list of every cook you've logged, so you
+can see what you've actually been eating and when.
 
 ---
 
 ## Tips
 
 - **The more you tap "Cooked it," the smarter it gets.** Logging your cooks is what lets
-  the app surface forgotten favorites and rotate your bases.
+  the app surface forgotten favorites and rotate your bases. Dishes you cook often get a
+  gentle boost once they've been forgotten for a while, so proven favorites resurface
+  ahead of also-rans — without ever jumping the queue while they're still fresh.
 - **Add to Home Screen** for the app-like, full-screen experience.
 - **Dark mode** is in the top corner toggle.
 

@@ -45,18 +45,24 @@ in a while. **All app logic runs in the browser**; Supabase is the only backend.
 ### The suggestion engine — `src/lib/suggest.ts`
 The heart of the app, kept **pure and dependency-free** so it's unit-tested in isolation
 (`suggest.test.ts`). Key points:
-- `recipeWeight` = `1 + days since last cooked` (capped at `MAX_DAYS`); never-cooked
-  recipes get the `BASE_NEW` baseline. Longer-untouched ⇒ higher weight ⇒ more likely.
+- `recipeWeight` = recency × frequency-boost. Recency = `1 + days since last cooked`
+  (capped at `MAX_DAYS`); never-cooked recipes get the `BASE_NEW` baseline. Longer-
+  untouched ⇒ higher weight ⇒ more likely. **Recency stays primary.**
+- The frequency boost is a mild, capped, logarithmic multiplier from `timesCooked`
+  (`FREQ_K` / `MAX_FREQ_BOOST`) so favorites resurface *among already-forgotten* recipes.
+  `timesCooked === 0` ⇒ boost `1`, so the `BASE_NEW` baseline is preserved exactly.
 - `suggest()` filters then draws a **weighted-random** ranked list (Efraimidis–Spirakis
   via `weightedShuffle`). Inject `rng`/`now` for determinism — a constant `rng` degrades
   it to a deterministic sort by weight, which the tests rely on.
 - Ingredient filtering is **strict ALL-match** (recipe must contain every selected
-  ingredient). Base rotation is a hard exclude of `avoidBase`.
+  ingredient). Base rotation is two-layered: a hard exclude of `avoidBase` (last night),
+  plus a soft `BASE_REPEAT_PENALTY` on the bases of the last `RECENT_BASE_NIGHTS`
+  cook-log entries (`recentBases`) — a penalty, not a filter, so the pool never empties.
 - When changing weighting/filtering, update `suggest.test.ts` accordingly.
 
 ### UI
-- Two screens under `src/screens/` (`Tonight`, `Recipes`) switched by **tab state in
-  `App.tsx`** — intentionally **no router** so GitHub Pages needs no SPA-routing
+- Three screens under `src/screens/` (`Tonight`, `Recipes`, `History`) switched by **tab
+  state in `App.tsx`** — intentionally **no router** so GitHub Pages needs no SPA-routing
   fallback. Don't add react-router without revisiting the Pages deploy.
 - `AuthGate` wraps everything: shows a setup hint if env vars are missing, an
   email/password sign-in if logged out, otherwise the app. Accounts are created by the
