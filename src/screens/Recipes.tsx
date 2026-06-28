@@ -7,6 +7,7 @@ import {
   BASE_EMOJI,
   BASE_LABEL,
   isForgotten,
+  isNew,
   lastCookedLabel,
 } from '../lib/format';
 
@@ -68,6 +69,7 @@ function RecipeRow({
   onEdit: () => void;
 }) {
   const forgotten = isForgotten(recipe);
+  const fresh = isNew(recipe);
   return (
     <li
       className={`card flex items-center gap-3 p-3 ${
@@ -78,6 +80,11 @@ function RecipeRow({
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <p className="truncate font-bold">{recipe.name}</p>
+          {fresh && (
+            <span className="shrink-0 rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-bold uppercase text-brand-600 dark:bg-brand-900/50 dark:text-brand-200">
+              New
+            </span>
+          )}
           {forgotten && (
             <span className="shrink-0 rounded-full bg-earth-200 px-2 py-0.5 text-[10px] font-bold uppercase text-earth-400 dark:bg-brand-900/50 dark:text-brand-200">
               Forgotten
