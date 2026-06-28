@@ -26,8 +26,13 @@ function Main() {
   return (
     <div className="mx-auto flex min-h-full max-w-md flex-col">
       <header className="sticky top-0 z-10 flex items-center justify-between bg-earth-50/80 px-4 py-3 backdrop-blur dark:bg-ink/80">
-        <h1 className="text-lg font-extrabold text-brand-800 dark:text-brand-200">
-          🍲 What's for Din-Din?
+        <h1 className="flex items-center gap-2 text-lg font-extrabold text-brand-800 dark:text-brand-200">
+          <img
+            src={`${import.meta.env.BASE_URL}favicon.svg`}
+            alt=""
+            className="h-7 w-7 rounded-lg"
+          />
+          What's for Din-Din?
         </h1>
         <div className="flex items-center gap-1">
           <ThemeToggle />
