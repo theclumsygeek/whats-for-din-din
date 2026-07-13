@@ -14,7 +14,9 @@
 // Keep it only in .env.local (git-ignored). Treat it like a password.
 
 import { createClient } from '@supabase/supabase-js';
-import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import { mkdir, writeFile, readFile, unlink, readdir } from 'node:fs/promises';
+
+const MAX_BACKUPS = 12;
 
 // --- tiny .env.local loader (no dotenv dependency) ---
 const env = {};
@@ -59,3 +61,13 @@ const stamp = new Date().toISOString().replace(/[:.]/g, '-');
 const file = new URL(`dindin-${stamp}.json`, dir);
 await writeFile(file, JSON.stringify(dump, null, 2));
 console.log(`Wrote ${file.pathname.slice(1)}`);
+
+// Prune old backups, keeping only the MAX_BACKUPS most recent. The ISO-derived
+// timestamp in the filename sorts lexicographically, so a plain name sort is
+// chronological.
+const entries = (await readdir(dir)).filter((f) => /^dindin-.*\.json$/.test(f)).sort();
+const stale = entries.slice(0, Math.max(0, entries.length - MAX_BACKUPS));
+for (const name of stale) {
+  await unlink(new URL(name, dir));
+  console.log(`Pruned ${name}`);
+}

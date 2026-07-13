@@ -86,6 +86,9 @@ The heart of the app, kept **pure and dependency-free** so it's unit-tested in i
   Secret API key, `sb_secret_…`) from `.env.local` to bypass RLS and dump both tables to
   `backups/` (git-ignored). This key is *not* `VITE_`-prefixed, so it never reaches the
   client bundle — keep it local. The repo is public, so backup JSON must stay out of git.
+  Each run prunes old dumps, keeping only the 12 most recent (`MAX_BACKUPS` in
+  `backup.mjs`). `scripts/backup.cmd` wraps the script for Windows Task Scheduler,
+  logging each run to `backups/backup.log`.
 
 See `SETUP.md` for the full Supabase + Pages one-time setup (`README.md` is the
 user-facing usage guide).

@@ -104,9 +104,15 @@ Supabase's free tier has no automated backups, so take your own. With a
 npm run backup   # writes backups/dindin-<timestamp>.json (recipes + cook_log)
 ```
 
+Each run also prunes old backups, keeping only the 12 most recent (`MAX_BACKUPS` in
+`scripts/backup.mjs`).
+
 The `backups/` folder is git-ignored — the repo is public, so your data must never be
-committed. To run it automatically, schedule `npm run backup` (e.g. Windows Task
-Scheduler / cron); from there you can sync the JSON to your own private storage.
+committed. To run it automatically, schedule `scripts/backup.cmd` (Windows Task
+Scheduler) or `npm run backup` directly (cron); from there you can sync the JSON to your
+own private storage. `backup.cmd` runs the backup through `cmd.exe` and appends a
+timestamped entry to `backups/backup.log` — useful since Task Scheduler runs programs
+directly and won't otherwise capture stdout/stderr.
 
 ---
 
